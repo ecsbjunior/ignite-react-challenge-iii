@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { MdAddShoppingCart } from 'react-icons/md';
+import { useState, useEffect } from 'react';
 
-import { ProductList } from './styles';
 import { api } from '../../services/api';
 import { formatPrice } from '../../util/format';
-import { useCart } from '../../hooks/useCart';
+
+import { ProductListItem } from '../../components/ProductListItem';
+
+import { ProductList } from './styles';
 
 interface Product {
   id: number;
@@ -17,49 +18,41 @@ interface ProductFormatted extends Product {
   priceFormatted: string;
 }
 
-interface CartItemsAmount {
-  [key: number]: number;
-}
-
 const Home = (): JSX.Element => {
-  // const [products, setProducts] = useState<ProductFormatted[]>([]);
-  // const { addProduct, cart } = useCart();
-
-  // const cartItemsAmount = cart.reduce((sumAmount, product) => {
-  //   // TODO
-  // }, {} as CartItemsAmount)
+  const [products, setProducts] = useState<ProductFormatted[]>([]);
 
   useEffect(() => {
     async function loadProducts() {
-      // TODO
+      const response = await api.get(`/products`);
+      setProducts((response.data as Product[]).map(product => {
+        return {
+          id: product.id,
+          title: product.title,
+          price: product.price,
+          priceFormatted: formatPrice(product.price),
+          image: product.image
+        }
+      }));
     }
 
     loadProducts();
   }, []);
 
-  function handleAddProduct(id: number) {
-    // TODO
-  }
-
   return (
     <ProductList>
-      <li>
-        <img src="https://rocketseat-cdn.s3-sa-east-1.amazonaws.com/modulo-redux/tenis1.jpg" alt="Tênis de Caminhada Leve Confortável" />
-        <strong>Tênis de Caminhada Leve Confortável</strong>
-        <span>R$ 179,90</span>
-        <button
-          type="button"
-          data-testid="add-product-button"
-        // onClick={() => handleAddProduct(product.id)}
-        >
-          <div data-testid="cart-product-quantity">
-            <MdAddShoppingCart size={16} color="#FFF" />
-            {/* {cartItemsAmount[product.id] || 0} */} 2
-          </div>
-
-          <span>ADICIONAR AO CARRINHO</span>
-        </button>
-      </li>
+      {
+        products.map(product => {
+          return (
+            <ProductListItem
+              key={product.id}
+              id={product.id}
+              title={product.title}
+              priceFormatted={product.priceFormatted}
+              image={product.image}
+            />
+          )
+        })
+      }
     </ProductList>
   );
 };
